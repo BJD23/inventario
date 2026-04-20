@@ -1,5 +1,5 @@
 # Etapa 1: Build con Gradle
-FROM gradle:latest AS build
+FROM gradle:8.8-jdk21 AS build
 WORKDIR /app
 COPY . .
 RUN bash gradlew build -x test --no-daemon
