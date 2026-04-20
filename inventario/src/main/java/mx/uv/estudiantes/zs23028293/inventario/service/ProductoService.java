@@ -12,7 +12,7 @@ import mx.uv.estudiantes.zs23028293.inventario.repository.ProductoRepository;
 @Service
 @RequiredArgsConstructor
 public class ProductoService {
-    private ProductoRepository repository;
+    private final ProductoRepository repository;
 
     public List<Producto> listarTodos() {
         return repository.findAll();

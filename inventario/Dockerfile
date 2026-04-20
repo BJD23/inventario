@@ -1,11 +1,11 @@
 # Etapa 1: Build con Gradle
-FROM gradle:8.10-jdk17 AS build
+FROM gradle:latest AS build
 WORKDIR /app
 COPY . .
-RUN ./gradle build -x test --no-daemon
+RUN bash gradlew build -x test --no-daemon
 
 #Etapa 2 Imagen Ligera de runetime (produccion)
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 #Se copia el jar generado en la etapa de build
