@@ -1,23 +1,58 @@
-# Inventario App - Docker Setup
+# Inventario App - Docker Deployment Guide
 
-## Requisitos
-- Docker y Docker Compose instalados
+## Para otros usuarios desde Docker Hub
 
-## Opción 1: Desde Docker Hub (Recomendado)
+**IMPORTANTE:** Esta app requiere PostgreSQL. No uses `docker run` sin una base de datos.
 
+### Opción 1: Usar Docker Compose (Recomendado ✅)
+
+1. **Descarga el docker-compose.yml** desde el repositorio:
 ```bash
-# Clonar el repositorio o descargar el docker-compose.yml
-docker compose pull
+wget https://raw.githubusercontent.com/BJD23/inventario/main/docker-compose.yml
+```
+
+2. **Inicia los servicios:**
+```bash
 docker compose up -d
 ```
 
-La aplicación estará disponible en `http://localhost:8081`
+La app estará en `http://localhost:8081`
 
-## Opción 2: Construir localmente
+---
+
+### Opción 2: Correr con una BD existente
+
+Si ya tienes PostgreSQL corriendo en tu máquina (puerto 5432):
 
 ```bash
-docker compose up -d --build
+docker run -p 8080:8080 \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PORT=5432 \
+  -e DB_USER=tu_usuario \
+  -e DB_PASSWORD=tu_contraseña \
+  sebastianc23/inventario-app:latest
 ```
+
+---
+
+### Opción 3: Correr PostgreSQL y la app por separado con Docker
+
+```bash
+# Terminal 1: PostgreSQL
+docker run -d --name inventario-db \
+  -e POSTGRES_DB=inventariodb \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -p 5432:5432 \
+  postgres:16-alpine
+
+# Terminal 2: App (espera 5 segundos a que Postgres inicie)
+docker run -p 8080:8080 \
+  -e DB_HOST=host.docker.internal \
+  sebastianc23/inventario-app:latest
+```
+
+---
 
 ## Verificar estado
 
@@ -26,25 +61,17 @@ docker compose ps
 ```
 
 Deberías ver:
-- `inventario-db` en estado `healthy`
-- `inventario-app` en estado `up`
+- `inventario-db`: Healthy ✅
+- `inventario-app`: Up ✅
 
-## Parar los contenedores
+## Parar todo
 
 ```bash
 docker compose down
 ```
 
-## Notas importantes
+## Notas
 
-- **NO usar `docker run`** - La app necesita Postgres, usa `docker compose`
-- La base de datos se persiste en un volumen Docker
-- La app se reinicia automáticamente si falla
+- Los datos de la BD se persisten en un volumen Docker
+- La app se reinicia automáticamente si falla  
 - Los healthchecks monitorean ambos servicios
-
-## Conectar a la base de datos
-
-```bash
-psql -h localhost -U postgres -d inventariodb
-# Contraseña: postgres
-```
