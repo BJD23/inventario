@@ -11,13 +11,28 @@ API REST completa para gestionar el inventario de productos de una tienda, const
 
 ## Quick Start - Docker Compose (Recomendado)
 
+### Opción A: Para desarrollo (construir localmente)
+
 ```bash
 # 1. Clonar el repositorio
 git clone https://github.com/BJD23/inventario
 cd inventario
 
-# 2. Iniciar con Docker Compose (incluye la BD automáticamente)
+# 2. Iniciar con Docker Compose (construye la imagen localmente)
 docker compose up -d
+
+# La app estará en http://localhost:8081
+```
+
+### Opción B: Para producción (usar imagen de Docker Hub)
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/BJD23/inventario
+cd inventario
+
+# 2. Iniciar con la imagen desde Docker Hub
+docker compose -f docker-compose.prod.yml up -d
 
 # La app estará en http://localhost:8081
 ```
@@ -45,17 +60,17 @@ docker compose down
 
 ---
 
-## Docker Hub
+## Docker Hub - Guía Detallada
 
-Si quieres usar la imagen desde Docker Hub, **debes usar Docker Compose** (no `docker run` solo).
+Si quieres usar solo la imagen de Docker Hub sin clonar el repo:
 
-**Opción 1: Con Docker Compose (recomendado)**
+**Opción 1: Descargar solo docker-compose.prod.yml**
 ```bash
-docker compose pull
+wget https://raw.githubusercontent.com/BJD23/inventario/main/docker-compose.prod.yml -O docker-compose.yml
 docker compose up -d
 ```
 
-**Opción 2: Con PostgreSQL existente**
+**Opción 2: Con PostgreSQL existente en tu máquina**
 ```bash
 docker run -p 8080:8080 \
   -e DB_HOST=host.docker.internal \
@@ -66,6 +81,13 @@ docker run -p 8080:8080 \
 ```
 
 Ver más opciones en [DOCKER_SETUP.md](./DOCKER_SETUP.md)
+
+---
+
+## Archivos Docker Compose
+
+- **`docker-compose.yml`** - Construye la imagen localmente (para desarrollo)
+- **`docker-compose.prod.yml`** - Usa la imagen de Docker Hub (para producción)
 
 ---
 
