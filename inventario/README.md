@@ -9,32 +9,27 @@ API REST completa para gestionar el inventario de productos de una tienda, const
 - JPA - Hibernate
 - Docker & Docker Compose
 
-## Quick Start - Docker Compose (Recomendado)
+---
 
-### Opción A: Para desarrollo (construir localmente)
+## Quick Start - SIN CLONAR NADA (Opción más fácil)
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/BJD23/inventario
-cd inventario
+# Descarga solo el archivo docker-compose
+curl -O https://raw.githubusercontent.com/BJD23/inventario/main/docker-compose.standalone.yml
 
-# 2. Iniciar con Docker Compose (construye la imagen localmente)
+# Renombralo a docker-compose.yml
+mv docker-compose.standalone.yml docker-compose.yml
+
+# Levanta los servicios
 docker compose up -d
 
 # La app estará en http://localhost:8081
 ```
 
-### Opción B: Para producción (usar imagen de Docker Hub)
-
+O con wget:
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/BJD23/inventario
-cd inventario
-
-# 2. Iniciar con la imagen desde Docker Hub
-docker compose -f docker-compose.prod.yml up -d
-
-# La app estará en http://localhost:8081
+wget https://raw.githubusercontent.com/BJD23/inventario/main/docker-compose.standalone.yml -O docker-compose.yml
+docker compose up -d
 ```
 
 **Verifica el estado:**
@@ -49,6 +44,21 @@ docker compose down
 
 ---
 
+## Quick Start - CON REPOSITORIO (Para desarrollo)
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/BJD23/inventario
+cd inventario
+
+# 2. Iniciar con Docker Compose (construye localmente para desarrollo)
+docker compose up -d
+
+# La app estará en http://localhost:8081
+```
+
+---
+
 ## Ejecución Local sin Docker
 
 ```bash
@@ -57,37 +67,6 @@ docker compose down
 # 3. Ejecuta con Gradle
 ./gradlew bootRun
 ```
-
----
-
-## Docker Hub - Guía Detallada
-
-Si quieres usar solo la imagen de Docker Hub sin clonar el repo:
-
-**Opción 1: Descargar solo docker-compose.prod.yml**
-```bash
-wget https://raw.githubusercontent.com/BJD23/inventario/main/docker-compose.prod.yml -O docker-compose.yml
-docker compose up -d
-```
-
-**Opción 2: Con PostgreSQL existente en tu máquina**
-```bash
-docker run -p 8080:8080 \
-  -e DB_HOST=host.docker.internal \
-  -e DB_PORT=5432 \
-  -e DB_USER=postgres \
-  -e DB_PASSWORD=postgres \
-  sebastianc23/inventario-app:latest
-```
-
-Ver más opciones en [DOCKER_SETUP.md](./DOCKER_SETUP.md)
-
----
-
-## Archivos Docker Compose
-
-- **`docker-compose.yml`** - Construye la imagen localmente (para desarrollo)
-- **`docker-compose.prod.yml`** - Usa la imagen de Docker Hub (para producción)
 
 ---
 
@@ -107,7 +86,7 @@ Ver más opciones en [DOCKER_SETUP.md](./DOCKER_SETUP.md)
 
 ### Base de Datos
 
-- **Host:** `localhost` (o `db` en Docker)
+- **Host:** `db` (interno en Docker)
 - **Puerto:** 5432
 - **Database:** `inventariodb`
 - **Usuario:** `postgres`
@@ -115,7 +94,7 @@ Ver más opciones en [DOCKER_SETUP.md](./DOCKER_SETUP.md)
 
 ### Puertos
 
-- **App:** Puerto 8080 (mapeado a 8081 en Docker)
+- **App:** Puerto 8080 interno → 8081 externo
 - **BD:** Puerto 5432
 
 ---
@@ -133,21 +112,52 @@ docker compose logs inventario-db
 
 # Ver estado en tiempo real
 docker compose ps
+
+# Ver estado detallado
+docker inspect inventario-app
 ```
 
 ---
 
-## Variables de Entorno
+## Variables de Entorno Personalizadas
 
-Puedes personalizar la conexión a BD con variables de entorno:
+Si quieres cambiar credenciales o puerto, edita el `docker-compose.yml` antes de ejecutar:
 
+```yaml
+environment:
+  DB_HOST: db
+  DB_PORT: "5432"
+  DB_USER: postgres
+  DB_PASSWORD: tu_contraseña_aqui
+```
+
+Luego ejecuta:
 ```bash
-docker run -p 8080:8080 \
-  -e DB_HOST=tu_host \
-  -e DB_PORT=tu_puerto \
-  -e DB_USER=tu_usuario \
-  -e DB_PASSWORD=tu_contraseña \
-  sebastianc23/inventario-app:latest
+docker compose up -d
+```
+
+---
+
+## Archivos Docker Compose
+
+- **`docker-compose.standalone.yml`** - Usa la imagen de Docker Hub (SIN clonar repo) ⭐
+- **`docker-compose.prod.yml`** - Usa la imagen de Docker Hub (necesita repo)
+- **`docker-compose.yml`** - Construye la imagen localmente (para desarrollo)
+
+---
+
+## Troubleshooting
+
+**"Connection refused"**
+- Asegúrate de que Postgres esté saludable: `docker compose ps`
+- Espera 10 segundos a que Postgres inicie completamente
+
+**Puerto ya en uso**
+- Cambia el puerto en `docker-compose.yml`: `"8082:8080"` en lugar de `"8081:8080"`
+
+**Ver logs completos**
+```bash
+docker compose logs -f
 ```
 
 ---
